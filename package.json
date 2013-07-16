@@ -1,0 +1,22 @@
+{
+  "name": "mongo-graph",
+  "version": "0.0.1",
+  "description": "visualize mongo data",
+  "engines": {
+    "node": ">=0.8.x"
+  },
+  "repository": "git://github.com/Clever/mongo-graph.git",
+  "bin": {
+    "mongo-graph": "./cli.js"
+  },
+  "scripts": {
+    "prepublish": "make"
+  },
+  "license": "BSD",
+  "dependencies": {
+    "coffee-script": "~1.6.3",
+    "underscore": "~1.5.1",
+    "dotty": "0.0.2",
+    "JSONStream": "~0.6.4"
+  }
+}
