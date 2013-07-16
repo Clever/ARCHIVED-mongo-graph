@@ -1,0 +1,4 @@
+{ "_id" : { "$oid" : "1" }, "link" : { "$oid" : "3" }, "__collection": "A" }
+{ "_id" : { "$oid" : "2" }, "link" : { "$oid" : "4" }, "__collection": "A" }
+{ "_id" : { "$oid" : "3" }, "link" : { "$oid" : "1" }, "__collection": "B" }
+{ "_id" : { "$oid" : "4" }, "link" : { "$oid" : "2" }, "__collection": "B" }
