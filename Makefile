@@ -10,11 +10,11 @@ cli.js: ./lib-js/cli.js
 	mv /tmp/cli.js ./cli.js
 	chmod +x ./cli.js
 
-TESTS=$(shell ls test/)
+TESTS=$(shell ls test/in/)
 $(TESTS): build
-	./cli.js test/in/$@ test/out/$@
+	cat test/in/$@ | ./cli.js > test/out/$@
 test: $(TESTS)
-	git status -- test/out
+	git diff test/out
 
 untest:
 	git checkout test/out/*

@@ -30,4 +30,4 @@ process.stdin.pipe(JSONStream.parse()).on 'data', (data) ->
     dst = dotty.get(data, link).$oid
     stream.write "  \"#{node_id}\" -> \"#{dst}\" [style=solid, label=\"#{link}\", color=\"0 1 0.5\", fontcolor=\"0 1 0.5\"];\n"
 
-.on 'end', () -> stream.write '\n}\n'
+.on 'end', () -> stream.write '}\n'
