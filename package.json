@@ -1,6 +1,6 @@
 {
   "name": "mongo-graph",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "visualize mongo data",
   "engines": {
     "node": ">=0.8.x"
