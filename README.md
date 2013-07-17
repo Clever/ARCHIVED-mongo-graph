@@ -6,7 +6,7 @@ Visualizes connections between documents in a mongo database.
 
     npm install mongo-graph -g
 
-You also need ![GraphViz](http://www.graphviz.org/). On a Mac with homebrew you can `brew install graphviz`.
+You also need [GraphViz](http://www.graphviz.org/). On a Mac with homebrew you can `brew install graphviz`.
 
 ## Basic Usage
 
