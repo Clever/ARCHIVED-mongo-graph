@@ -1,0 +1,27 @@
+digraph {
+  ranksep=4;
+  rankdir=LR;
+  concentrate=true;
+  node [shape=box, style=filled];
+  graph [overlap=false];
+  "1" [label="a", fillcolor="0.00 0.18 0.80"];
+  "2" [label="b", fillcolor="0.00 0.18 0.80"];
+  "3" [label="c", fillcolor="0.13 0.79 0.97"];
+  "4" [label="d", fillcolor="0.13 0.79 0.97"];
+  "1" -> "3" [style=solid, label="link", color="0.13 0.79 0.97", fontcolor="0.13 0.79 0.97"];
+  "2" -> "4" [style=solid, label="link", color="0.13 0.79 0.97", fontcolor="0.13 0.79 0.97"];
+  "3" -> "1" [style=solid, label="link", color="0.00 0.18 0.80", fontcolor="0.00 0.18 0.80"];
+  "4" -> "2" [style=solid, label="link", color="0.00 0.18 0.80", fontcolor="0.00 0.18 0.80"];
+  subgraph A {
+    "A" [label=A, fillColor=white];
+    rank=same;
+    "1";
+    "2";
+  }
+  subgraph B {
+    "B" [label=B, fillColor=white];
+    rank=same;
+    "3";
+    "4";
+  }
+}
