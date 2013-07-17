@@ -6,6 +6,6 @@ digraph {
   graph [overlap=false];
   "1" [label="1", fillcolor="#1abc9c", penwidth=0, fontname="helvetica", fontcolor=white];
   "2" [label="2", fillcolor="#1abc9c", penwidth=0, fontname="helvetica", fontcolor=white];
-  "1" -> "2" [style=solid, label="link.nested", color="#1abc9c", fontcolor="#1abc9c"];
-  "2" -> "1" [style=solid, label="link", color="#1abc9c", fontcolor="#1abc9c"];
+  "1" -> "2" [style=solid, label="link.nested", color="#9b59b6", fontcolor="#9b59b6"];
+  "2" -> "1" [style=solid, label="link", color="#d35400", fontcolor="#d35400"];
 }
