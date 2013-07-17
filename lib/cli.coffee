@@ -3,10 +3,29 @@ JSONStream = require 'JSONStream'
 dotty = require 'dotty'
 srand = require 'srand'
 srand.seed 9
+COLORS = [
+  '#1abc9c'
+  '#2ecc71'
+  '#3498db'
+  '#9b59b6'
+  '#34495e'
+  '#16a085'
+  '#27ae60'
+  '#2980b9'
+  '#8e44ad'
+  '#2c3e50'
+  '#f1c40f'
+  '#e67e22'
+  '#e74c3c'
+  '#ecf0f1'
+  '#95a5a6'
+  '#f39c12'
+  '#d35400'
+  '#c0392b'
+  '#bdc3c7'
+  '#7f8c8d'
+]
 
-# proc = spawn 'dot', ['-Tpng', '-o', outPath]
-# stream = proc.stdin
-# proc.stderr.pipe process.stderr
 stream = process.stdout
 stream.write   """
   digraph {
@@ -20,9 +39,10 @@ stream.write   """
 # collect __collection metadata attached to each object in order to draw subgraphs
 collections = {} # e.g. # { "collection_name": { fillcolor: "...", nodes: [...] } ... }"
 
-# if a node isn't part of a collection, give it a default color. otherwise gen randomly
-DEFAULT_FILL="0 0.5 0.8"
-rnd_color = () -> ("#{srand.random().toFixed(2)}" for i in [0..2]).join(' ')
+rnd_color = () ->
+  #("#{srand.random().toFixed(2)}" for i in [0..2]).join(' ')
+  COLORS[Math.floor(srand.random() * COLORS.length)]
+DEFAULT_FILL=rnd_color()
 
 # store all edge info for writing/coloring correctly at the very end
 # edges are colored w/ the same color as their dest node
@@ -44,7 +64,7 @@ handle_data = (data) ->
   colors[node_id] = node_color
 
   # create/label/fill the node
-  stream.write "  \"#{node_id}\" [label=\"#{node_label}\", fillcolor=\"#{node_color}\"];\n"
+  stream.write "  \"#{node_id}\" [label=\"#{node_label}\", fillcolor=\"#{node_color}\", penwidth=0, fontname=\"helvetica\", fontcolor=white];\n"
 
   # store edges out from this node
   edge_labels = _(dotty.deepKeys(data)).chain()
@@ -70,7 +90,7 @@ process.stdin.pipe(JSONStream.parse()).on 'data', (data) ->
   # group together nodes in the same collection
   for cname, cinfo of collections
     stream.write "  subgraph #{cname} {\n"
-    stream.write "    \"#{cname}\" [label=#{cname}, fillColor=white];\n"
+    stream.write "    \"#{cname}\" [label=#{cname}, fillcolor=\"#{cinfo.fillcolor}\", penwidth=0, fontname=\"helvetica\", fontcolor=white];\n"
     stream.write "    rank=same;\n"
     stream.write "    \"#{node}\";\n" for node in cinfo.nodes
     stream.write "  }\n"
