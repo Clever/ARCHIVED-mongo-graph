@@ -29,7 +29,7 @@ mongoexport --db test-db --collection foo | mongo-graph | dot -Tpng -o out.png &
 
 ### Multiple collections
 
-Data in a db often has links between documents in different collections. The output of `mongoexport` contains no data about the associated collection. However, mongo-graph can interpret a `__collection` field as metadata about which collection the json object belongs to. You can do this at the db level, or use a handy command-line json modifier like [jsontool](http://trentm.com/json/):
+Data in a db often has links between documents in different collections. The output of `mongoexport` contains no data about the associated collection. However, mongo-graph can interpret a `__collection` field as metadata about which collection the json object belongs to. You can do this at the db level or use a handy command-line json modifier like [jsontool](http://trentm.com/json/):
 
 ```bash
 mongo test-db --quiet --eval 'db.foo.remove(); db.foo.insert([
