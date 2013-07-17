@@ -48,8 +48,18 @@ DEFAULT_FILL=rnd_color()
 # edges are colored w/ the same color as their dest node
 edges = {} # e.g. { "<source_node_id>": [{label: "...", dest: "..."} ... ], ... }
 
-# store mapping from node -> color for edge drawing at the very end
-colors = {}
+# mapping from collection -> edge label -> color
+edge_colors = {} # e.g. { "collection_name": { "im.a.nested.path": "#color", ... } ... }
+default_edge_colors = {} # backup for when there's no collection name
+# get a color for (collection, label) pairing, picking a new one if it hasn't
+# already been picked
+edge_color = (collection, label) ->
+  label_map = 
+    if collection?
+      edge_colors[collection] ?= {}
+      edge_colors[collection]
+    else default_edge_colors
+  label_map[label] ?= rnd_color()
 
 handle_data = (data) ->
   # all nodes keyed on objectid
@@ -61,7 +71,6 @@ handle_data = (data) ->
     collections[data.__collection] ?= {fillcolor: rnd_color(), nodes: []}
     collections[data.__collection].nodes.push node_id
     node_color = collections[data.__collection].fillcolor
-  colors[node_id] = node_color
 
   # create/label/fill the node
   stream.write "  \"#{node_id}\" [label=\"#{node_label}\", fillcolor=\"#{node_color}\", penwidth=0, fontname=\"helvetica\", fontcolor=white];\n"
@@ -73,7 +82,9 @@ handle_data = (data) ->
     .value()
   if edge_labels.length
     edges[node_id] = _(edge_labels).map (label) ->
-      { label: label, dest: dotty.get(data, label).$oid }
+      label: label
+      dest: dotty.get(data, label).$oid
+      color: edge_color data.__collection, label
 
 process.stdin.pipe(JSONStream.parse()).on 'data', (data) ->
   # sometimes we get piped arrays, sometimes we get one json obj per line
@@ -85,7 +96,7 @@ process.stdin.pipe(JSONStream.parse()).on 'data', (data) ->
   # draw edges
   for source, edgeinfos of edges
     for edge in edgeinfos
-      stream.write "  \"#{source}\" -> \"#{edge.dest}\" [style=solid, label=\"#{edge.label}\", color=\"#{colors[edge.dest]}\", fontcolor=\"#{colors[edge.dest]}\"];\n"
+      stream.write "  \"#{source}\" -> \"#{edge.dest}\" [style=solid, label=\"#{edge.label}\", color=\"#{edge.color}\", fontcolor=\"#{edge.color}\"];\n"
 
   # group together nodes in the same collection
   for cname, cinfo of collections
