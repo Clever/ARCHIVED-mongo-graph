@@ -35,6 +35,7 @@ handle_data = (data) ->
   # all nodes keyed on objectid
   node_id = data._id.$oid
   node_color = DEFAULT_FILL
+  node_label = data.__label or node_id
 
   if data.__collection?
     collections[data.__collection] ?= {fillcolor: rnd_color(), nodes: []}
@@ -43,7 +44,7 @@ handle_data = (data) ->
   colors[node_id] = node_color
 
   # create/label/fill the node
-  stream.write "  \"#{node_id}\" [label=\"#{node_id}\", fillcolor=\"#{node_color}\"];\n"
+  stream.write "  \"#{node_id}\" [label=\"#{node_label}\", fillcolor=\"#{node_color}\"];\n"
 
   # store edges out from this node
   edge_labels = _(dotty.deepKeys(data)).chain()
