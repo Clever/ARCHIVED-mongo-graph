@@ -17,6 +17,7 @@
     "coffee-script": "~1.6.3",
     "underscore": "~1.5.1",
     "dotty": "0.0.2",
-    "JSONStream": "~0.6.4"
+    "JSONStream": "~0.6.4",
+    "srand": "~1.1.3"
   }
 }

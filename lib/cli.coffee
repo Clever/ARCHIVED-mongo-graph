@@ -1,6 +1,8 @@
 _ = require 'underscore'
 JSONStream = require 'JSONStream'
 dotty = require 'dotty'
+srand = require 'srand'
+srand.seed 1
 
 # proc = spawn 'dot', ['-Tpng', '-o', outPath]
 # stream = proc.stdin
@@ -15,19 +17,55 @@ stream.write   """
     graph [overlap=false];\n
   """
 
+# collect __collection metadata attached to each object in order to draw subgraphs
+collections = {} # e.g. # { "collection_name": { fillcolor: "...", nodes: [...] } ... }"
+
+# if a node isn't part of a collection, give it a default color. otherwise gen randomly
+DEFAULT_FILL="0 0.5 0.8"
+rnd_color = () -> ("#{srand.random().toFixed(2)}" for i in [0..2]).join(' ')
+
+# store all edge info for writing/coloring correctly at the very end
+# edges are colored w/ the same color as their dest node
+edges = {} # e.g. { "<source_node_id>": [{label: "...", dest: "..."} ... ], ... }
+
+# store mapping from node -> color for edge drawing at the very end
+colors = {}
+
 process.stdin.pipe(JSONStream.parse()).on 'data', (data) ->
 
-  # create/label/fill the node
+  # all nodes keyed on objectid
   node_id = data._id.$oid
-  stream.write "  \"#{node_id}\" [label=\"#{node_id}\",fillcolor=\"0 0.5 0.8\"];\n"
+  node_color = DEFAULT_FILL
 
-  # create edges out from this node
-  links = _(dotty.deepKeys(data)).chain()
+  if data.__collection?
+    collections[data.__collection] ?= {fillcolor: rnd_color(), nodes: []}
+    collections[data.__collection].nodes.push node_id
+    node_color = collections[data.__collection].fillcolor
+  colors[node_id] = node_color
+
+  # create/label/fill the node
+  stream.write "  \"#{node_id}\" [label=\"#{node_id}\", fillcolor=\"#{node_color}\"];\n"
+
+  # store edges out from this node
+  edge_labels = _(dotty.deepKeys(data)).chain()
     .filter((key) -> _(key).last() is '$oid' and _(key).first() isnt '_id')
     .map((link_arr) -> link_arr[0..link_arr.length-2].join('.'))
     .value()
-  for link in links
-    dst = dotty.get(data, link).$oid
-    stream.write "  \"#{node_id}\" -> \"#{dst}\" [style=solid, label=\"#{link}\", color=\"0 1 0.5\", fontcolor=\"0 1 0.5\"];\n"
+  if edge_labels.length
+    edges[node_id] = _(edge_labels).map (label) ->
+      { label: label, dest: dotty.get(data, label).$oid }
 
-.on 'end', () -> stream.write '}\n'
+.on 'end', () ->
+  # draw edges
+  for source, edgeinfos of edges
+    for edge in edgeinfos
+      stream.write "  \"#{source}\" -> \"#{edge.dest}\" [style=solid, label=\"#{edge.label}\", color=\"#{colors[edge.dest]}\", fontcolor=\"#{colors[edge.dest]}\"];\n"
+
+  # group together nodes in the same collection
+  for cname, cinfo of collections
+    stream.write "  subgraph #{cname} {\n"
+    stream.write "    \"#{cname}\" [label=#{cname}, fillColor=white];\n"
+    stream.write "    rank=same;\n"
+    stream.write "    \"#{node}\";\n" for node in cinfo.nodes
+    stream.write "  }\n"
+  stream.write '}\n'
