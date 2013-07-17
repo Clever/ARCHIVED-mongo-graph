@@ -30,6 +30,12 @@ rnd_color = () ->
   #("#{srand.random().toFixed(2)}" for i in [0..2]).join(' ')
   COLORS[Math.floor(srand.random() * COLORS.length)]
 
+# tries to pick a color distinct from those in other_colors
+distinct_color = (other_colors) ->
+  loop # equiv to a do...until loop
+    c = rnd_color()
+    return c if (c not in other_colors) or (other_colors.length >= COLORS.length)
+
 stream = process.stdout
 stream.write   """
   digraph {
@@ -59,7 +65,8 @@ edge_color = (collection, label) ->
       edge_colors[collection] ?= {}
       edge_colors[collection]
     else default_edge_colors
-  label_map[label] ?= rnd_color()
+  # store a random color and return it
+  label_map[label] ?= distinct_color _.values label_map
 
 handle_data = (data) ->
   # all nodes keyed on objectid
@@ -67,7 +74,9 @@ handle_data = (data) ->
   node_label = data.__label or node_id
 
   if data.__collection?
-    collections[data.__collection] ?= {fillcolor: rnd_color(), nodes: []}
+    collections[data.__collection] ?= 
+      fillcolor: distinct_color _(collections).pluck 'fillcolor'
+      nodes: []
     collections[data.__collection].nodes.push node_id
     node_color = collections[data.__collection].fillcolor
   else
