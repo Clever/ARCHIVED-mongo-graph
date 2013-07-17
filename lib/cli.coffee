@@ -2,7 +2,7 @@ _ = require 'underscore'
 JSONStream = require 'JSONStream'
 dotty = require 'dotty'
 srand = require 'srand'
-srand.seed 1
+srand.seed 9
 
 # proc = spawn 'dot', ['-Tpng', '-o', outPath]
 # stream = proc.stdin
@@ -31,8 +31,7 @@ edges = {} # e.g. { "<source_node_id>": [{label: "...", dest: "..."} ... ], ... 
 # store mapping from node -> color for edge drawing at the very end
 colors = {}
 
-process.stdin.pipe(JSONStream.parse()).on 'data', (data) ->
-
+handle_data = (data) ->
   # all nodes keyed on objectid
   node_id = data._id.$oid
   node_color = DEFAULT_FILL
@@ -55,6 +54,12 @@ process.stdin.pipe(JSONStream.parse()).on 'data', (data) ->
     edges[node_id] = _(edge_labels).map (label) ->
       { label: label, dest: dotty.get(data, label).$oid }
 
+process.stdin.pipe(JSONStream.parse()).on 'data', (data) ->
+  # sometimes we get piped arrays, sometimes we get one json obj per line
+  if _(data).isArray()
+    handle_data d for d in data
+  else
+    handle_data data
 .on 'end', () ->
   # draw edges
   for source, edgeinfos of edges
