@@ -26,6 +26,10 @@ COLORS = [
   '#7f8c8d'
 ]
 
+rnd_color = () ->
+  #("#{srand.random().toFixed(2)}" for i in [0..2]).join(' ')
+  COLORS[Math.floor(srand.random() * COLORS.length)]
+
 stream = process.stdout
 stream.write   """
   digraph {
@@ -38,11 +42,7 @@ stream.write   """
 
 # collect __collection metadata attached to each object in order to draw subgraphs
 collections = {} # e.g. # { "collection_name": { fillcolor: "...", nodes: [...] } ... }"
-
-rnd_color = () ->
-  #("#{srand.random().toFixed(2)}" for i in [0..2]).join(' ')
-  COLORS[Math.floor(srand.random() * COLORS.length)]
-DEFAULT_FILL=rnd_color()
+default_collection = fillcolor: rnd_color(), nodes: [] # backup for collection-less nodes
 
 # store all edge info for writing/coloring correctly at the very end
 # edges are colored w/ the same color as their dest node
@@ -54,13 +54,15 @@ colors = {}
 handle_data = (data) ->
   # all nodes keyed on objectid
   node_id = data._id.$oid
-  node_color = DEFAULT_FILL
   node_label = data.__label or node_id
 
   if data.__collection?
     collections[data.__collection] ?= {fillcolor: rnd_color(), nodes: []}
     collections[data.__collection].nodes.push node_id
     node_color = collections[data.__collection].fillcolor
+  else
+    default_collection.nodes.push node_id
+    node_color = default_collection.fillcolor
   colors[node_id] = node_color
 
   # create/label/fill the node
@@ -75,6 +77,10 @@ handle_data = (data) ->
     edges[node_id] = _(edge_labels).map (label) ->
       { label: label, dest: dotty.get(data, label).$oid }
 
+was_seen = (node_id) ->
+  _.some _.values(collections).concat([default_collection]), (c) ->
+    _.contains c.nodes, node_id
+
 process.stdin.pipe(JSONStream.parse()).on 'data', (data) ->
   # sometimes we get piped arrays, sometimes we get one json obj per line
   if _(data).isArray()
@@ -84,7 +90,8 @@ process.stdin.pipe(JSONStream.parse()).on 'data', (data) ->
 .on 'end', () ->
   # draw edges
   for source, edgeinfos of edges
-    for edge in edgeinfos
+    # skipping any edges to nodes that we've never seen
+    for edge in edgeinfos when was_seen edge.dest
       stream.write "  \"#{source}\" -> \"#{edge.dest}\" [style=solid, label=\"#{edge.label}\", color=\"#{colors[edge.dest]}\", fontcolor=\"#{colors[edge.dest]}\"];\n"
 
   # group together nodes in the same collection
