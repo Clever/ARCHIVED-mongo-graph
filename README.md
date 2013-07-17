@@ -6,7 +6,7 @@ Visualizes connections between documents in a mongo database.
 
     npm install mongo-graph -g
 
-You also need ![GraphViz](http://www.graphviz.org/). On a Mac with homebrew you can `brew install graphviz`.
+You also need [GraphViz](http://www.graphviz.org/). On a Mac with homebrew you can `brew install graphviz`.
 
 ## Basic Usage
 
@@ -23,7 +23,7 @@ mongo test-db --quiet --eval 'db.foo.remove(); db.foo.insert([
 mongoexport --db test-db --collection foo | mongo-graph | dot -Tpng -o out.png && open out.png
 ```
 
-![](http://cl.ly/image/1z471T2s3d1u)
+![](http://f.cl.ly/items/0Q0f143u1M230l451z2t/out.png)
 
 ## Advanced usage
 
@@ -53,7 +53,7 @@ mongoexport --jsonArray --db test-db --collection bar | json -e 'this.__collecti
 cat foo.in bar.in | mongo-graph | dot -Tpng -o out.png && open out.png
 ```
 
-![](http://cl.ly/image/172o3M0l0z2y)
+![](http://f.cl.ly/items/3J0z3Q3F2O342C3M2e0E/out.png)
 
 
 ### Custom node names
@@ -86,4 +86,4 @@ mongoexport --jsonArray --db test-db --collection bar | json -e 'this.__collecti
 cat foo.in bar.in | mongo-graph | dot -Tpng -o out.png && open out.png
 ```
 
-![](http://cl.ly/image/120q1j000h0U)
+![](http://f.cl.ly/items/0T020L3A1a1S1S2X3i3U/out.png)
