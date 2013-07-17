@@ -23,7 +23,7 @@ mongo test-db --quiet --eval 'db.foo.remove(); db.foo.insert([
 mongoexport --db test-db --collection foo | mongo-graph | dot -Tpng -o out.png && open out.png
 ```
 
-![](http://f.cl.ly/items/0Q0f143u1M230l451z2t/out.png)
+![](http://f.cl.ly/items/1g0V2K1Z1H3Z1V1v0N43/out.png)
 
 ## Advanced usage
 
@@ -53,7 +53,7 @@ mongoexport --jsonArray --db test-db --collection bar | json -e 'this.__collecti
 cat foo.in bar.in | mongo-graph | dot -Tpng -o out.png && open out.png
 ```
 
-![](http://f.cl.ly/items/3J0z3Q3F2O342C3M2e0E/out.png)
+![](http://f.cl.ly/items/0I0G1O2g3Z3s2w1k2w3Y/out.png)
 
 
 ### Custom node names
@@ -86,4 +86,4 @@ mongoexport --jsonArray --db test-db --collection bar | json -e 'this.__collecti
 cat foo.in bar.in | mongo-graph | dot -Tpng -o out.png && open out.png
 ```
 
-![](http://f.cl.ly/items/0T020L3A1a1S1S2X3i3U/out.png)
+![](http://f.cl.ly/items/3b0J1g3i2V3f1h0h1G3O/out.png)
