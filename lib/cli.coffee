@@ -30,6 +30,12 @@ rnd_color = () ->
   #("#{srand.random().toFixed(2)}" for i in [0..2]).join(' ')
   COLORS[Math.floor(srand.random() * COLORS.length)]
 
+# tries to pick a color distinct from those in other_colors
+distinct_color = (other_colors) ->
+  loop # equiv to a do...until loop
+    c = rnd_color()
+    return c if (c not in other_colors) or (other_colors.length >= COLORS.length)
+
 stream = process.stdout
 stream.write   """
   digraph {
@@ -48,8 +54,19 @@ default_collection = fillcolor: rnd_color(), nodes: [] # backup for collection-l
 # edges are colored w/ the same color as their dest node
 edges = {} # e.g. { "<source_node_id>": [{label: "...", dest: "..."} ... ], ... }
 
-# store mapping from node -> color for edge drawing at the very end
-colors = {}
+# mapping from collection -> edge label -> color
+edge_colors = {} # e.g. { "collection_name": { "im.a.nested.path": "#color", ... } ... }
+default_edge_colors = {} # backup for when there's no collection name
+# get a color for (collection, label) pairing, picking a new one if it hasn't
+# already been picked
+edge_color = (collection, label) ->
+  label_map = 
+    if collection?
+      edge_colors[collection] ?= {}
+      edge_colors[collection]
+    else default_edge_colors
+  # store a random color and return it
+  label_map[label] ?= distinct_color _.values label_map
 
 handle_data = (data) ->
   # all nodes keyed on objectid
@@ -57,13 +74,14 @@ handle_data = (data) ->
   node_label = data.__label or node_id
 
   if data.__collection?
-    collections[data.__collection] ?= {fillcolor: rnd_color(), nodes: []}
+    collections[data.__collection] ?= 
+      fillcolor: distinct_color _(collections).pluck 'fillcolor'
+      nodes: []
     collections[data.__collection].nodes.push node_id
     node_color = collections[data.__collection].fillcolor
   else
     default_collection.nodes.push node_id
     node_color = default_collection.fillcolor
-  colors[node_id] = node_color
 
   # create/label/fill the node
   stream.write "  \"#{node_id}\" [label=\"#{node_label}\", fillcolor=\"#{node_color}\", penwidth=0, fontname=\"helvetica\", fontcolor=white];\n"
@@ -75,7 +93,9 @@ handle_data = (data) ->
     .value()
   if edge_labels.length
     edges[node_id] = _(edge_labels).map (label) ->
-      { label: label, dest: dotty.get(data, label).$oid }
+      label: label
+      dest: dotty.get(data, label).$oid
+      color: edge_color data.__collection, label
 
 was_seen = (node_id) ->
   _.some _.values(collections).concat([default_collection]), (c) ->
@@ -92,7 +112,7 @@ process.stdin.pipe(JSONStream.parse()).on 'data', (data) ->
   for source, edgeinfos of edges
     # skipping any edges to nodes that we've never seen
     for edge in edgeinfos when was_seen edge.dest
-      stream.write "  \"#{source}\" -> \"#{edge.dest}\" [style=solid, label=\"#{edge.label}\", color=\"#{colors[edge.dest]}\", fontcolor=\"#{colors[edge.dest]}\"];\n"
+      stream.write "  \"#{source}\" -> \"#{edge.dest}\" [style=solid, label=\"#{edge.label}\", color=\"#{edge.color}\", fontcolor=\"#{edge.color}\"];\n"
 
   # group together nodes in the same collection
   for cname, cinfo of collections
