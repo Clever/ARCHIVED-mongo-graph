@@ -10,7 +10,8 @@
     "mongo-graph": "./cli.js"
   },
   "scripts": {
-    "prepublish": "make"
+    "prepublish": "make",
+    "test": "make test"
   },
   "license": "BSD",
   "dependencies": {
