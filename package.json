@@ -11,7 +11,9 @@
   },
   "scripts": {
     "prepublish": "make",
-    "test": "make test"
+    "test": "make test",
+    "preinstall": "npx npm-force-resolutions",
+    "postshrinkwrap": "npx npm-force-resolutions"
   },
   "license": "BSD",
   "dependencies": {
@@ -20,5 +22,11 @@
     "dotty": "0.0.2",
     "JSONStream": "~0.6.4",
     "srand": "~1.1.3"
+  },
+  "devDependencies": {
+    "npm-force-resolutions": "0.0.10"
+  },
+  "resolutions": {
+    "dotty": "^0.1.2"
   }
 }
