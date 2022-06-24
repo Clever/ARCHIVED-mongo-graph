@@ -1,6 +1,8 @@
-# mongo-graph
+# Notice
 
-_ARCHIVED: This repo is no longer maintained by Clever. If you're interested in taking ownership, please let us know via a GH issue._
+_ARCHIVED: This repo is no longer maintained by Clever._
+
+# mongo-graph
 
 Visualizes connections between documents in a mongo database.
 
